@@ -3,20 +3,29 @@ const express = require('express');
 // Serve static files with express.static and use Morgan middleware for logging
 const morgan = require('morgan');
 
+// import route modules
+const campsiteRouter = require('./routes/campsiteRouter');
+const promotionRouter = require('./routes/promotionRouter');
+const partnerRouter = require('./routes/partnerRouter');
+
 const hostname = 'localhost';
 const port = 3000;
 
-const app = express(); // returns an express server application that is avaiable under the var name app
+// returns an express server application that is avaiable under the var name app
+const app = express(); 
 
-// adding Morgan middleware
-app.use(morgan('dev'));
-app.use(express.json());
+// middleware
+app.use(morgan('dev')); // adding Morgan middleware for logging
+app.use(express.json()); // middleware that handles json data parsing
 
+// routes (sorta like middleware)
 // multiple routers can be set up as modules for easier use and cleaner code
-// instead of defining routes in this file, move them to campsiteRouter.js and reference them here via use()
+// instead of defining routes in this file, move them to their respective .js files and reference them here via use(). 
+app.use('/promotions', promotionRouter);
+app.use('/partners', partnerRouter);
 app.use('/campsites', campsiteRouter);
 
-/* ----- Set up a REST API - MOVED TO campsiteRouter.js
+/* ----- Set up a REST API - (IGNORE - for reference. moved to campsiteRouter.js in a later exercise.)
     app.all('/campsites', (req, res, next) => {
       res.statusCode = 200;
       res.setHeader('Content-Type', 'text/plain');
@@ -39,16 +48,20 @@ app.use('/campsites', campsiteRouter);
     app.delete('/campsites', (req, res) => {
       res.end('Deleting all campsites');
     });
-
+    
+    // route parameter allows us to store whatever client sends as a part of the path after the slash as a route param called 'campsiteId'
     app.get('/campsites/:campsiteId', (req, res) => {
       res.end(`Will send details of the campsite: ${req.params.campsiteId} to you`);
     });
 
+    // post request will not be supported on this path but we will handle the request with a response
     app.post('/campsites/:campsiteId', (req, res) => {
-      res.statusCode = 403;
+      res.statusCode = 403; // operation is not supported
       res.end(`POST operation not supported on /campsites/${req.params.campsiteId}`);
     });
 
+    // echo back what was sent from the json body's request message
+    // send a multiline response and update the campsiteId
     app.put('/campsites/:campsiteId', (req, res) => {
       res.write(`Updating the campsite: ${req.params.campsiteId}\n`);
       res.end(`Will update the campsite: ${req.body.name}
