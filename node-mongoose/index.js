@@ -11,7 +11,7 @@ const Campsite = require('./models/campsite');
 
 // connect to the nucampsite database on the MongoDB server
 // const url = 'mongodb://localhost:27017/nucampsite';
-const url = 'mongodb://localhost:27017/campsite';
+const url = 'mongodb://localhost:27017/nucampsite';
 // mongoose.connect() is a wrapper around the MongoDB node driver's connect method. it's similar to the way we connected before, but with added Mongoose functionality
 // the first arg is the url, the second is an object with options settings. we are setting the options below to deal with some MDB driver deprecations
 const connect = mongoose.connect(url, {
@@ -42,7 +42,7 @@ connect.then(() => {
     })
     .then(campsites => { // take the array returned and log it
         console.log(campsites); 
-        return Campsite.deleteMany(); // call on all documents that se the campsite model
+        return Campsite.deleteMany(); // call on all documents that use the campsite model
     })
     .then(() => { // close the connection
         return mongoose.connection.close();
@@ -51,9 +51,16 @@ connect.then(() => {
         console.log(err);
         mongoose.connection.close();
     });
------- */
+ */
 
-/* ------ 3. Exercise: Mongoose ODM Parts 2 & 3 - Part 2: Mongoose operations ------ */
+/* ------ 3. Exercise: Mongoose ODM Parts 2 & 3 - Part 2: Mongoose operations 
+
+  https://mongoosejs.com/docs/guide.html
+  https://mongoosejs.com/docs/subdocs.html
+  https://mongoosejs.com/docs/deprecations.html#findandmodify
+
+ */
+
     // we are now using the create() method - which is available on the model. it takes an an object that defines the document  and automatically saves it, we can remove the save() method
     // create() also returns a promise that resolves to the new document. it will be the start of our new promise chain
     Campsite.create({ 
@@ -62,10 +69,31 @@ connect.then(() => {
     })
     .then(campsite => {
       console.log(campsite);
-      return Campsite.find();
+      // return Campsite.find();
+
+      // update campsite document using the findByIdAndUpdate() method
+      // takes 3 args (id, update object, callback(err, res))
+      return Campsite.findByIdAndUpdate(campsite._id, {
+        // $set is an update operator { specify the field you want to change}
+        $set: { description: 'Updated Test Document'}
+      }, {
+        new: true // third arg. causes the method to return the updated document. if ommited, the method will return the original document before it was updated
+      });
     })
-    .then(campsites => {
-      console.log(campsites);
+    .then(campsite => { // adding a method to log the updated doc that was returned and add the new subdocument 
+      console.log(campsite);
+      // add new comment to comments array in campsite comment subdoc
+      campsite.comments.push({
+        rating: 5,
+        text: 'Great View',
+        author: 'Ena Jenkins'
+      });
+
+      // return the save() method in order for the update to take effect. save() returns the campsite that was saved with the new comment subdoc - a single campsite doc
+      return campsite.save();
+    })
+    .then(campsite => { // log the single campsite doc that was just saved with the subdoc
+      console.log(campsite);
       return Campsite.deleteMany();
     })
     .then(() => {
@@ -79,7 +107,7 @@ connect.then(() => {
 
 
 
-/* What we are doing with this promise chain in 2. Exercise: Mongoose ODM Part 1 
+/* What we are doing with the promise chain in 2. Exercise: Mongoose ODM Part 1 
 
   1. create a new document based on the mongoos model
   2. save the document which will automatically save to the campsite collection
