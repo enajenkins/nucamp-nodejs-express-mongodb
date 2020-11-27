@@ -1,8 +1,8 @@
 // the const acts as a client for the mongo server. it requires the mongodb-node driver and gets the MongoClient object from the driver
 const MongoClient = require('mongodb').MongoClient;
-// allows you to perform checks on values  
-const assert = require('assert').strict;
-// 
+// allows you to perform checks on values for error handling 
+// if you use promises, you won't need this because promises already have error handling 
+// const assert = require('assert').strict;
 const dboper = require('./operations');
 
 // set up a connection to the mongodb server
@@ -13,28 +13,51 @@ const url = 'mongodb://localhost:27017/';
 // const dbname = 'nucampsite';
 const dbname = 'campsite'; // for some reason my database name ended up as 'campsite'
 
-// to access the server, use the MongoClient.connect() method. connect() allows you to connect the MongoClient to the mongoDB server
-// the first arg is the url, the second is an options object, the third a callback: connect(url[, options], callback)
-// useUnifiedTopology is a recommended option setting that enables a major updates and rewrite of the topology layer of the mongo-node driver, eliminating warnings. it can be removed in later versions 
-// the callback has an err object param and the client
-// the client is used to connect to the database and perform operations
-MongoClient.connect(url, { useUnifiedTopology: true }, (err, client) => {
+/*  BEFORE REFACTOR...    
+  -- to access the server, use the MongoClient.connect() method. connect() allows you to connect the MongoClient to the mongoDB server
+  -- the first arg is the url, the second is an options object, the third a callback: connect(url[, options], callback)
+  -- useUnifiedTopology is a recommended option setting that enables a major updates and rewrite of the topology layer of the mongo-node driver, eliminating warnings. it can be removed in later versions 
+  -- the callback has an err object param and the client
+  -- the client is used to connect to the database and perform operations
 
-    // check to make sure the error is not null by checking and comparing values passed into the method
-    // assert.strictEqual(actual value, expected value);
-    // if the actual and expected match, continue - if not, assert fails, throws and error, terminates the entire application, and logs the error to the console. it's a shorthand for err===null ? put : continue
-    assert.strictEqual(err, null);
+  PREVIOUS CODE:
+
+  MongoClient.connect(url, { useUnifiedTopology: true }, (err, client) => {
+*/
+
+/* AFTER REFACTOR...
+  -- remove the callback so the method will, by default, return a promise and we can chain the then() method to it in order to handle the promise. if it resolves, it'll return the client as the resolve value
+
+  -- the then() method also takes a callback 
+
+  NEW CODE BELOW:
+*/
+MongoClient.connect(url, { useUnifiedTopology: true }).then(client => { // pass the resolve value returned from the promise into the then() callback
+
+    /*  BEFORE REFACTOR... 
+      -- check to make sure the error is not null by checking and comparing values passed into the method
+      -- assert.strictEqual(actual value, expected value);
+      -- if the actual and expected match, continue - if not, assert fails, throws and error, terminates the entire application, and logs the error to the console. it's a shorthand for err===null ? put : continue
+
+      PREVIOUS CODE:
+      assert.strictEqual(err, null);
+
+      NOW...
+      we no longer need assert() because promises have error handling: catch(), async(), await()
+    */
 
     // check connection to mongodb database server
     console.log('Connected correctly to server');
 
-    /* interact with the server through database operations */
-    // declare a const named 'db' and use the client.db() method to connect to the database (on mongodb database server). pass in the name of the database you want to connect to. use this db object to access methods to interact with database
-    const db = client.db(dbname);
+    /* ------ interact with the server through database operations 
+      * declare a const named 'db' and use the client.db() method to connect to the database (on mongodb database server). pass in the name of the database you want to connect to. use this db object to access methods to interact with database 
+    */
+    const db = client.db(dbname);  
 
 /* ------ 3. Exercise: Node and MongoDB Part 2: Use the Node module for database operations ------ */
 
-    // this is an example of 'Callback Hell'
+  /*  BEFORE REFACTOR... 
+    // this is an example of the 'Callback Hell' pyramid of doom 
     // each operation depends on the completion of the one before it
     db.dropCollection('campsites', (err, result) => {
         assert.strictEqual(err, null);
@@ -68,29 +91,78 @@ MongoClient.connect(url, { useUnifiedTopology: true }, (err, client) => {
             });
         });
     });
+  */
 
-    /* ------ Callback Hell ------ 
-      * can happen with nested callbacks
-      * often called 'pyramid of doom'
-      * It can be avoided by refactoring
-      * it happens when we write code with a top down approach, expecting code to run from the top down, in order. using named functions rather than anonymous ones can help prevent callback hell. for example:
-      * 
-        instead of...
-        setTimeout( () => { console.log('hello') }, 1000 );
+  /* ------ Callback Hell ------ 
+    * can happen with nested callbacks
+    * often called 'pyramid of doom'
+    * It can be avoided by refactoring
+    * it happens when we write code with a top down approach, expecting code to run from the top down, in order. using named functions rather than anonymous ones can help prevent callback hell. for example:
+    * 
+      instead of...
+      setTimeout( () => { console.log('hello') }, 1000 );
 
-        write...
-        sayHello = () => console.log('hi');
-        setTimeout(sayHello, 1000);
-      
-      * ES6 Promises will also help prevent callback hell. the promise acts as a proxy, or placeholder for a value which is unknown at the moment. the promise allows the code to continue to execute. if the value has an error, the promise is rejected with an error. if the value is valid, the promise is resolved and the value becomes available. when the promise is first created. it's in a 'poending' state before it is resolved or rejected. we can access the resolve value of a promise by using the .then() method. also. async() and await(). you can use the catch() method to catch errors. 
+      write...
+      sayHello = () => console.log('hi');
+      setTimeout(sayHello, 1000);
+    
+    * ES6 Promises will also help prevent callback hell. the promise acts as a proxy, or placeholder for a value which is unknown at the moment. the promise allows the code to continue to execute. if the value has an error, the promise is rejected with an error. if the value is valid, the promise is resolved and the value becomes available. when the promise is first created. it's in a 'poending' state before it is resolved or rejected. we can access the resolve value of a promise by using the .then() method. also. async() and await(). you can use the catch() method to catch errors. 
 
-      http://callbackhell.com/
-      https://colintoh.com/blog/staying-sane-with-asynchronous-programming-promises-and-generators
-      https://medium.com/@js_tut/the-great-escape-from-callback-hell-3006fa2c82e
-      https://learn.nucamp.co/mod/book/view.php?id=3233  
-    */
+    http://callbackhell.com/
+    https://colintoh.com/blog/staying-sane-with-asynchronous-programming-promises-and-generators
+    https://medium.com/@js_tut/the-great-escape-from-callback-hell-3006fa2c82e
+    https://learn.nucamp.co/mod/book/view.php?id=3233  
+  */
 
-});
+  /*  AFTER REFACTOR... 
+      *starting with insertDocument() we have a single promise chain that handles each of the db operations, waiting for each one to be resolved, and then continuing on with the next. this is a cleaner, easier to follow structure 
+  */ 
+ db.dropCollection('campsites')
+ .then(result => {
+     console.log('Dropped Collection:', result);
+ })
+ .catch(err => console.log('No collection to drop.'));
+
+ dboper.insertDocument(db, {name: "Breadcrumb Trail Campground", description: "Test"}, 'campsites')
+ .then(result => {
+     console.log('Insert Document:', result.ops);
+
+     return dboper.findDocuments(db, 'campsites');
+ })
+ .then(docs => {
+     console.log('Found Documents:', docs);
+
+     return dboper.updateDocument(db, { name: "Breadcrumb Trail Campground" },
+         { description: "Updated Test Description" }, 'campsites');
+ })
+ .then(result => {
+     console.log('Updated Document Count:', result.result.nModified);
+
+     return dboper.findDocuments(db, 'campsites');
+ })
+ .then(docs => {
+     console.log('Found Documents:', docs);
+
+     return dboper.removeDocument(db, { name: "Breadcrumb Trail Campground" },
+         'campsites');
+ })
+ .then(result => {
+     console.log('Deleted Document Count:', result.deletedCount);
+
+     return client.close();
+ })
+ .catch(err => {
+     console.log(err);
+     client.close();
+ });
+})
+.catch(err => console.log(err));
+
+/* REFACTOR: catch() - promise error handling 
+  * this is the end of the newly created .then() method
+  * chain the .catch() method here to check for errors
+  * catch() runs if the promise rejects
+  * it autimatically recieves the error object and console logs it's contents */
 
 
 /* ------ 2. Exercise: Node and MongoDB Part 1 (OLDER CODE FOR REFERENCE) ------ */
