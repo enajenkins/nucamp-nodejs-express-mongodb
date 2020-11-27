@@ -33,40 +33,64 @@ MongoClient.connect(url, { useUnifiedTopology: true }, (err, client) => {
     const db = client.db(dbname);
 
 /* ------ 3. Exercise: Node and MongoDB Part 2: Use the Node module for database operations ------ */
-        db.dropCollection('campsites', (err, result) => {
-            assert.strictEqual(err, null);
-            console.log('Dropped Collection:', result);
-    
-            dboper.insertDocument(db, { name: "Breadcrumb Trail Campground", description: "Test"},
-                'campsites', result => {
-                console.log('Insert Document:', result.ops);
-    
-                dboper.findDocuments(db, 'campsites', docs => {
-                    console.log('Found Documents:', docs);
-    
-                    dboper.updateDocument(db, { name: "Breadcrumb Trail Campground" },
-                        { description: "Updated Test Description" }, 'campsites',
-                        result => {
-                            console.log('Updated Document Count:', result.result.nModified);
-    
-                            dboper.findDocuments(db, 'campsites', docs => {
-                                console.log('Found Documents:', docs);
-                                
-                                dboper.removeDocument(db, { name: "Breadcrumb Trail Campground" },
-                                    'campsites', result => {
-                                        console.log('Deleted Document Count:', result.deletedCount);
-    
-                                        client.close();
-                                    }
-                                );
-                            });
-                        }
-                    );
-                });
+
+    // this is an example of 'Callback Hell'
+    // each operation depends on the completion of the one before it
+    db.dropCollection('campsites', (err, result) => {
+        assert.strictEqual(err, null);
+        console.log('Dropped Collection:', result);
+
+        dboper.insertDocument(db, { name: "Breadcrumb Trail Campground", description: "Test"},
+            'campsites', result => {
+            console.log('Insert Document:', result.ops);
+
+            dboper.findDocuments(db, 'campsites', docs => {
+                console.log('Found Documents:', docs);
+
+                dboper.updateDocument(db, { name: "Breadcrumb Trail Campground" },
+                    { description: "Updated Test Description" }, 'campsites',
+                    result => {
+                        console.log('Updated Document Count:', result.result.nModified);
+
+                        dboper.findDocuments(db, 'campsites', docs => {
+                            console.log('Found Documents:', docs);
+                            
+                            dboper.removeDocument(db, { name: "Breadcrumb Trail Campground" },
+                                'campsites', result => {
+                                    console.log('Deleted Document Count:', result.deletedCount);
+
+                                    client.close();
+                                }
+                            );
+                        });
+                    }
+                );
             });
         });
     });
 
+    /* ------ Callback Hell ------ 
+      * can happen with nested callbacks
+      * often called 'pyramid of doom'
+      * It can be avoided by refactoring
+      * it happens when we write code with a top down approach, expecting code to run from the top down, in order. using named functions rather than anonymous ones can help prevent callback hell. for example:
+      * 
+        instead of...
+        setTimeout( () => { console.log('hello') }, 1000 );
+
+        write...
+        sayHello = () => console.log('hi');
+        setTimeout(sayHello, 1000);
+      
+      * ES6 Promises will also help prevent callback hell. the promise acts as a proxy, or placeholder for a value which is unknown at the moment. the promise allows the code to continue to execute. if the value has an error, the promise is rejected with an error. if the value is valid, the promise is resolved and the value becomes available. when the promise is first created. it's in a 'poending' state before it is resolved or rejected. we can access the resolve value of a promise by using the .then() method. also. async() and await(). you can use the catch() method to catch errors. 
+
+      http://callbackhell.com/
+      https://colintoh.com/blog/staying-sane-with-asynchronous-programming-promises-and-generators
+      https://medium.com/@js_tut/the-great-escape-from-callback-hell-3006fa2c82e
+      https://learn.nucamp.co/mod/book/view.php?id=3233  
+    */
+
+});
 
 
 /* ------ 2. Exercise: Node and MongoDB Part 1 (OLDER CODE FOR REFERENCE) ------ */
@@ -116,3 +140,4 @@ MongoClient.connect(url, { useUnifiedTopology: true }, (err, client) => {
 // note the series of nested callbacks. we are using callbacks this way because we are working with async operations. it takes time to communicate with a server and get a response back. we need to handle these operations
 
 // run npms start from this folder and observe
+
