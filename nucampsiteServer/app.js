@@ -13,7 +13,6 @@ const partnerRouter = require('./routes/partnerRouter');
 var app = express();
 
 
-
 /* ------ 2. Exercise: REST API with Express, MongoDB, and Mongoose Part 1: Update the Express application ------ */
 
 const mongoose = require('mongoose');
@@ -45,10 +44,39 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
 // app.use() specifies middleware as the callback function and mounts it ()
+// middleware are applied in the order that they appear
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+
+// custom middleware function. it must have the req and res objects as params. this is true of all Express middleware functions. next is optional but good practice
+// 
+function auth(req, res, next) {
+  console.log(req.headers);
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+      const err = new Error('You are not authenticated!');
+      res.setHeader('WWW-Authenticate', 'Basic');
+      err.status = 401;
+      return next(err);
+  }
+
+  const auth = Buffer.from(authHeader.split(' ')[1], 'base64').toString().split(':');
+  const user = auth[0];
+  const pass = auth[1];
+  if (user === 'admin' && pass === 'password') {
+      return next(); // authorized
+  } else {
+      const err = new Error('You are not authenticated!');
+      res.setHeader('WWW-Authenticate', 'Basic');      
+      err.status = 401;
+      return next(err);
+  }
+}
+
+app.use(auth);
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
