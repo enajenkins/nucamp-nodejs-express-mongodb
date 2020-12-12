@@ -1,18 +1,20 @@
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
-var cookieParser = require('cookie-parser');
+// var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-const session = require('express-session');
-const FileStore = require('session-file-store')(session);
+// const session = require('express-session');
+// const FileStore = require('session-file-store')(session);
 const passport = require('passport');
-const authenticate = require('./authenticate');
+// const authenticate = require('./authenticate');
+const config = require('./config');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 const campsiteRouter = require('./routes/campsiteRouter');
 const promotionRouter = require('./routes/promotionRouter');
 const partnerRouter = require('./routes/partnerRouter');
+
 
 var app = express();
 
@@ -23,7 +25,9 @@ const mongoose = require('mongoose');
 
 // connect to the nucampsite database on the MongoDB server
 // const url = 'mongodb://localhost:27017/nucampsite';
-const url = 'mongodb://localhost:27017/nucampsite';
+// const url = 'mongodb://localhost:27017/nucampsite';
+const url = config.mongoUrl;
+
 // mongoose.connect() is a wrapper around the MongoDB node driver's connect method. it's similar to the way we connected before, but with added Mongoose functionality
 // the first arg is the url, the second is an object with options settings. we are setting the options below to deal with some MDB driver deprecations
 const connect = mongoose.connect(url, {
@@ -48,16 +52,16 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 // app.use(cookieParser('12345-67890-09876-54321'));
-app.use(session({
-  name: 'session-id',
-  secret: '12345-67890-09876-54321',
-  saveUninitialized: false,
-  resave: false,
-  store: new FileStore()
-}));
+// app.use(session({
+//   name: 'session-id',
+//   secret: '12345-67890-09876-54321',
+//   saveUninitialized: false,
+//   resave: false,
+//   store: new FileStore()
+// }));
 
 app.use(passport.initialize());
-app.use(passport.session());
+// app.use(passport.session());
 
 // custom middleware function. it must have the req and res objects as params. this is true of all Express middleware functions. next is optional but good practice
 
@@ -135,19 +139,19 @@ function auth(req, res, next) {
 */
 
 
-function auth(req, res, next) {
-  console.log(req.user);
+// function auth(req, res, next) {
+//   console.log(req.user);
 
-  if (!req.user) {
-      const err = new Error('You are not authenticated!');                    
-      err.status = 401;
-      return next(err);
-  } else {
-      return next();
-  }
-}
+//   if (!req.user) {
+//       const err = new Error('You are not authenticated!');                    
+//       err.status = 401;
+//       return next(err);
+//   } else {
+//       return next();
+//   }
+// }
 
-app.use(auth);
+// app.use(auth);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
