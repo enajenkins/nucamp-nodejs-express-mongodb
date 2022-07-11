@@ -60,28 +60,43 @@ app.use(express.urlencoded({ extended: false }));
 //   store: new FileStore()
 // }));
 
+
+
 app.use(passport.initialize());
 // app.use(passport.session());
 
+/* ------ Week 3 - Authentication | 2. Exercise: Basic Authentication: 
+    add authentication middleware here so users have to authenticate before accessing datat from the server
+    * https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication
+    * https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/WWW-Authenticate
+    * https://nodejs.org/api/buffer.html#buffer_class_method_buffer_from_array
+    
+    Buffer - Converting a Buffer into a string is typically referred to as encoding, and converting a string into a Buffer as decoding. Character encodings : 'utf8', 'utf16le', 'latin1', 'base64', 'hex', 'ascii', 'binary', 'ucs2'.
+------ */
 // custom middleware function. it must have the req and res objects as params. this is true of all Express middleware functions. next is optional but good practice
 
 // function auth(req, res, next) {
 //   if (!req.signedCookies.user) {
 //       const authHeader = req.headers.authorization;
-//       if (!authHeader) {
+//       if (!authHeader) { // if authHeader is null, (no authentication info in the request means user has not put in a username and password yet )
 //           const err = new Error('You are not authenticated!');
-//           res.setHeader('WWW-Authenticate', 'Basic');
-//           err.status = 401;
-//           return next(err);
+//           res.setHeader('WWW-Authenticate', 'Basic'); // set a response header that lets the client know that the server is requesting authentication and that the auth method is 'Basic'
+//           err.status = 401; // standard code when creds are not provided
+//           return next(err); // pass the error message to Express so it can handle sending the error message and authentication request back to the client.
 //       }
+// server will not only send the error message back, but it will now also challenge the client for credentials because we set the response header to request authentication. if the client responds to the challenge, the response comes back to the auth function and the process starts again.
 
+// parse the auth header and validate the username and password.
+  // you'll need to split the auth header that contains the word 'Basic', a space, then the username and password in a base-64 encoded string. Once the string is decoded, it will show the username and password seperated by a colon. for example... admin:password
+  // you want to parse out the UN and PW out from the auth header string and place them in a new array where admin[0] and password[1]
+  // put the array in a const named auth. use the Buffer global class from node (no need to require it) and use the static method from() to decode the UN and PW. The following code takes the auth header and extracts the UN and PW from it, putting them both in the auth array as the first and second items. 
 //       const auth = Buffer.from(authHeader.split(' ')[1], 'base64').toString().split(':');
-//       const user = auth[0];
-//       const pass = auth[1];
-//       if (user === 'admin' && pass === 'password') {
-//           res.cookie('user', 'admin', {signed: true});
+//       const user = auth[0]; // get the UN
+//       const pass = auth[1]; // get the PW
+//       if (user === 'admin' && pass === 'password') { // check to see if (hard coded for now) auth credentials match. if so (authorized) pass control to the next() middleware function
+//           res.cookie('user', 'admin', {signed: true}); // 
 //           return next(); // authorized
-//       } else {
+//       } else { // if not, challenge the client for auth creds, set error to 401, send off to Express error handler 
 //           const err = new Error('You are not authenticated!');
 //           res.setHeader('WWW-Authenticate', 'Basic');
 //           err.status = 401;
@@ -102,9 +117,9 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 /*
 function auth(req, res, next) {
-  console.log(req.session);
+  console.log(req.session); // log header to see what's in it
 
-  if (!req.session.user) {
+  if (!req.session.user) {  
       // const authHeader = req.headers.authorization;
       // if (!authHeader) {
           const err = new Error('You are not authenticated!');
@@ -113,6 +128,9 @@ function auth(req, res, next) {
           return next(err);
       // }
 
+      // Base64 encoding. When creating a Buffer from a string, this encoding will also correctly accept "URL and Filename Safe Alphabet" as specified in RFC 4648, Section 5. Whitespace characters such as spaces, tabs, and new lines contained within the base64-encoded string are ignored.
+      // create a buffer object from a string
+      // 
       // const auth = Buffer.from(authHeader.split(' ')[1], 'base64').toString().split(':');
       // const user = auth[0];
       // const pass = auth[1];
@@ -153,6 +171,7 @@ function auth(req, res, next) {
 
 // app.use(auth);
 
+/* adding authenitication here before static files are served */
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/campsites', campsiteRouter);

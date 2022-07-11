@@ -21,10 +21,10 @@ const Currency = mongoose.Types.Currency;
  ------ */
 
 const commentSchema = new Schema({
-    author: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
-    },
+    // author: {
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     ref: 'User'
+    // },
     rating: {
         type: Number,
         min: 1,
@@ -55,23 +55,23 @@ const campsiteSchema = new Schema({
         type: String,
         required: true
     },
-    image: {
-        type: String,
-        required: true
-    },
-    elevation: {
-        type: Number,
-        required: true
-    },
-    cost: {
-        type: Currency,
-        required: true,
-        min: 0
-    },
-    featured: {
-        type: Boolean,
-        default: false
-    },
+    // image: {
+    //     type: String,
+    //     required: true
+    // },
+    // elevation: {
+    //     type: Number,
+    //     required: true
+    // },
+    // cost: {
+    //     type: Currency,
+    //     required: true,
+    //     min: 0
+    // },
+    // featured: {
+    //     type: Boolean,
+    //     default: false
+    // },
     // 'commentSchema' is consumed as a subdocument of 'campsiteSchema'
     comments: [commentSchema] 
 }, {

@@ -3,9 +3,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-require('mongoose-currency').loadType(mongoose);
-const Currency = mongoose.Types.Currency;
-
 /* ------ 3. Exercise: Mongoose ODM Parts 2 & 3  
 
   * instantiate a partner schema that will be used to create and validate partner documents     

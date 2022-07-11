@@ -717,6 +717,8 @@ So...
 
 * in CommonJS, modules are loaded synchronously and processed in the order they occur.
 
+
+
 ## Callback Functions, Higher Order Functions, and First-Class Fuctions
 * First-Class Fuctions - functions tha are treated like any other variable. They can be assigned to variables, passed as arguments, and used as the return value of another function.
 
@@ -1045,6 +1047,8 @@ http://zetcode.com/javascript/http/
 
   ## Express and NPM
   * Express is a framework for building HTTP servers
+  * Node runs JS independent of the web browser using 'node filename.js'
+  * 
 
 
   ## REST (Representational State Transfer) and SOAP (Simple Object Access Protocol)
@@ -1696,14 +1700,17 @@ The server challenge and the client credentials will both be sent by uing HTTP h
 
 * ```encoding``` is not the same as ```encrypted```. when something is encoded in ```Base-64```, it is easy to decode it. encoding is not done or security purposes. it can be intercepted and decoded - exposing the username and password.
 
-* once decodes, the string will contain the username and password, separated by a colon. ```username:password```. 
+* once decoded, the string will contain the username and password, separated by a colon. ```username:password```. 
 
 * authentication middleware - the express server applies middleware to a request in the order that it is declared.
 
 * each middleware is a function that takes the req and res 'stream' objects (constructed by the express server when a request is sent) as arguments. Then the middleware processes the objects like parsing or adding something to the objects. If the requsest is not ended by middleware, it goes to the next middleware function.
+
+* the 
 
 https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication
 https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/WWW-Authenticate
 https://expressjs.com/en/guide/using-middleware.html
 https://medium.com/swlh/powering-the-internet-with-base64-d823ec5df747
 
+ 

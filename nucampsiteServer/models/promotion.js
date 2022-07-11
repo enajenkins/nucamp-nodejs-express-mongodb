@@ -26,10 +26,14 @@ const promotionSchema = new Schema({
     type: String,
     required: true
   },
-  featured: false,
+  featured: {
+    type: Boolean,
+    default: false
+  },
   cost: {
     type: Currency, // Use the mongoose-currency library's Currency type for the cost field.
-    required: true
+    required: true,
+    min: 0
   },
   description: {
       type: String,

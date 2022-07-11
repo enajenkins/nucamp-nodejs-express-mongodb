@@ -16,6 +16,7 @@ const url = 'mongodb://localhost:27017/nucampsite';
 // the first arg is the url, the second is an object with options settings. we are setting the options below to deal with some MDB driver deprecations
 const connect = mongoose.connect(url, {
     useCreateIndex: true,
+    useFindAndModify: false,
     useNewUrlParser: true,
     useUnifiedTopology: true
 });
@@ -109,11 +110,11 @@ connect.then(() => {
 
 /* What we are doing with the promise chain in 2. Exercise: Mongoose ODM Part 1 
 
-  1. create a new document based on the mongoos model
+  1. create a new document based on the mongoose model
   2. save the document which will automatically save to the campsite collection
   3. console.log() the saved document 
   4. find and log all the docs instantiated form the model
-  5.delete all the docs created from the model
+  5. delete all the docs created from the model
   6. close the connection
 
   OUTPUT:
